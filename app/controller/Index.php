@@ -2,6 +2,8 @@
 namespace app\controller;
 
 use app\BaseController;
+use Hashids\Hashids;
+use think\Facade\Env;
 
 class Index extends BaseController
 {
@@ -13,5 +15,10 @@ class Index extends BaseController
     public function hello($name = 'ThinkPHP6')
     {
         return 'hello,' . $name;
+    }
+
+    public function encode(){
+        $hashids = new Hashids(Env::get('JWT.SECRET'));
+        return $hashids->encode(100000, 100000); // Z4UrtW
     }
 }

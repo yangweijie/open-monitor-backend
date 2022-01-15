@@ -22,7 +22,10 @@
     "require": {
         "php": ">=7.2.5",
         "topthink/framework": "^6.0.0",
-        "topthink/think-orm": "^2.0"
+        "topthink/think-orm": "^2.0",
+        "thans/tp-jwt-auth": "^1.2",
+        "jaguarjack/migration-generator": "dev-master",
+        "hashids/hashids": "^4.1"
     },
     "require-dev": {
         "symfony/var-dumper": "^4.2",
