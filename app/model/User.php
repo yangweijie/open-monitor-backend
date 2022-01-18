@@ -3,15 +3,24 @@ declare (strict_types = 1);
 
 namespace app\model;
 
-use think\Model;
-
 /**
  * @mixin \think\Model
  */
-class User extends Model
+class User extends BaseModel
 {
-    // 自动写入时间戳
-    protected $autoWriteTimestamp = true;
+    public static $types = [
+        'config' => 'json',
+        'keys'   => 'json'
+    ];
 
-    protected $dateFormat         = 'Y-m-d H:i:s';
+    public function setPasswordAttr($value, $data)
+    {
+        if(empty($value)){
+            $this->disuse[] = 'password';
+        }else{
+            return \Hash::make((string)$value);
+        }
+    }
+
+
 }
