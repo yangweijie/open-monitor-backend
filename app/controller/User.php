@@ -5,8 +5,7 @@ namespace app\controller;
 
 use think\Request;
 use app\model\User AS UserModel;
-use app\validate\User AS UserValidation;
-use think\exception\ValidateException;
+use thans\jwt\facade\JWTAuth;
 
 class User
 {
@@ -47,6 +46,22 @@ class User
             }
             $ret = UserModel::create($data);
             return $this->success($ret);
+        }
+    }
+
+    public function login($name, $password){
+        $exist = UserModel::where('name', $name)->find();
+        if($exist){
+            if(\Hash::check($password, $exist['password']) === true){
+                $exist['token'] = $token = 'Bearer ' . JWTAuth::builder(['uid' => $exist['id']]);
+                return $this->success($exist);
+            }else{
+                // trace($password);
+                // trace(\Hash::make($password));
+                return $this->error404('密码错误');
+            }
+        }else{
+            return $this->error404('账号不存在');
         }
     }
 

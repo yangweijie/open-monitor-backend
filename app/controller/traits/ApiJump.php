@@ -16,4 +16,8 @@ trait ApiJump
     public function error401(){
         return json('No valid API Key was given', 401);
     }
+
+    public function error404($msg){
+        return json($msg, 404);
+    }
 }

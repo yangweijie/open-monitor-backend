@@ -1,0 +1,5 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="open-apm" type="PhpWebAppRunConfigurationType" factoryName="PHP Web Application" singleton="false" server_name="oapm">
+    <method v="2" />
+  </configuration>
+</component>

@@ -29,11 +29,11 @@ class Error extends BaseController
         // trace($param);
         // trace($args);
         // trace($this->request->post());
-        trace($this->request->header());
+        // trace($this->request->header());
         $param = $this->request->getInput();
-        trace($param);
-        trace(base64_decode($param));
-        trace(json_decode(base64_decode($param)));
+        // trace($param);
+        // trace(base64_decode($param));
+        // trace(json_decode(base64_decode($param)));
         return json($param);
     }
 
