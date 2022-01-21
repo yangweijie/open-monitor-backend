@@ -16,7 +16,7 @@ class Project extends BaseModel
     public function setKeyAttr($value, $data)
     {
         $nextId = $this->nextId();
-        trace($this->nextId());
+        // trace($this->nextId());
         return encodeId($this->nextId());
     }
 

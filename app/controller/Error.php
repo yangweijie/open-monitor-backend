@@ -7,6 +7,7 @@ use app\BaseController;
 use app\model\Project;
 use app\model\Transaction;
 use app\model\Segement;
+use app\model\Error AS ErrorModel;
 
 class Error extends BaseController
 {
@@ -17,24 +18,23 @@ class Error extends BaseController
     public function __call($method, $args)
     {
         $header = $this->request->header();
-        if (isset($header['x-inspector-key'])) {
-            $key = $header['x-inspector-key'];
-            $version = $header['x-inspector-version'];
-            return $this->parseMonitor($key, $version, $this->request->getInput());
-        } else {
-            return '404';
-        }
-        $param = $this->request->server();
         trace('in error');
         // trace($param);
         // trace($args);
         // trace($this->request->post());
         // trace($this->request->header());
-        $param = $this->request->getInput();
         // trace($param);
         // trace(base64_decode($param));
-        // trace(json_decode(base64_decode($param)));
-        return json($param);
+        if (isset($header['x-inspector-key'])) {
+            $key     = $header['x-inspector-key'];
+            $version = $header['x-inspector-version'];
+            $param   = $this->request->getInput();
+            trace(base64_decode($param));
+            trace(json_decode(base64_decode($param)));
+            return $this->parseMonitor($key, $version, $this->request->getInput());
+        } else {
+            return '404';
+        }
     }
 
     public function parseMonitor($key, $version, $input)
@@ -42,43 +42,77 @@ class Error extends BaseController
         $project = Project::where('key', $key)->find();
         if ($project) {
             $this->project_id = $project->id;
-            $data = json_decode(base64_decode($input), 1);
+            $data             = json_decode(base64_decode($input), 1);
+            $t_row            = null;
             if ($data) {
-                $transcation = array_shift($data);
-                if ($transcation->model == 'transaction') {
-                    $transcation_insert = [
-                        'name'        => $transcation['name'],
-                        'type'        => $transcation['type'],
-                        'host'        => $transcation['host'],
-                        'http'        => $transcation['http']?? null,
-                        'url'         => $transcation['url'],
-                        'create_time' => datetime($transcation['timestamp']),
-                        'context'     => $transcation['context']?? null,
-                        'result'      => $transcation['result'],
-                        'memory'      => $transcation['memory_peak'],
-                        'p50'         => $transcation['duration'],
-                    ];
-                    $t_row = Transaction::create($transcation_insert);
-                    if($data){
-                        foreach ($data as $key => $value) {
-                            if($value['model'] == 'segment'){
-                                Segement::create([
-                                    'type'        => $value['type'],
-                                    'label'       => $value['label'],
-                                    'group_hash'  => $t_row['group_hash'],
-                                    'project_id'  => $t_row->id,
-                                    'host'        => $value['host'],
-                                    'create_time' => datetime($value['timestamp']),
-                                    'duration'    => $value['duration'],
-                                ]);
+                foreach ($data as $key => $item) {
+                    switch ($item['model']) {
+                        case 'transaction':
+                            $transaction_insert = [
+                            'name'        => $item['name'],
+                            'type'        => $item['type'],
+                            'host'        => $item['host'],
+                            'http'        => $item['http']?? null,
+                            'create_time' => datetime($item['timestamp']),
+                            'context'     => $item['context']?? null,
+                            'result'      => $item['result'],
+                            'memory'      => $item['memory_peak'],
+                            'p50'         => $item['duration'],
+                            'group_hash'  => '',
+                            'hash'        => $item['hash'],
+                            'project_id'  => $this->project_id,
+                        ];
+                        $t_row = Transaction::create($transaction_insert);
+                            break;
+                        case 'segment':
+                            if($t_row){
+                                $group_hash = $t_row['group_hash'];
                             }else{
-                                trace($value);
+                                $group_hash = Transaction::where('hash', $item['transaction']['hash'])->value('group_hash')??'';
+                                if($group_hash){
+                                    $t_row = ['group_hash' => $group_hash];
+                                }
                             }
-                        }
+                            if($group_hash){
+                                Segement::create([
+                                    'type'        => $item['type'],
+                                    'label'       => $item['label'],
+                                    'group_hash'  => $group_hash,
+                                    'project_id'  => $this->project_id,
+                                    'hash'        => '',
+                                    'host'        => $item['host'],
+                                    'create_time' => datetime($item['timestamp']),
+                                    'duration'    => $item['duration'],
+                                    'label'       => $item['label'],
+                                    'start'       => $item['start'],
+                                ]);
+                            }
+                            break;
+                        default:
+                            if($t_row){
+                                $group_hash = $t_row['group_hash'];
+                            }else{
+                                $group_hash = Transaction::where('hash', $item['transaction']['hash'])->value('group_hash')??'';
+                                if($group_hash){
+                                    $t_row = ['group_hash' => $group_hash];
+                                }
+                            }
+                            ErrorModel::create([
+                                'project_id'  => $this->project_id,
+                                'create_time' => datetime($item['timestamp']),
+                                'message'     => $item['message'],
+                                'group_hash'  => $group_hash,
+                                'muted'       => 0,
+                                'class'       => $item['class'],
+                                'file'        => $item['file'],
+                                'line'        => $item['line'],
+                                'code'        => $item['code'],
+                                'stack'       => $item['stack'],
+                                'hash'        => '',
+                                'handled'     => 1,
+                            ]);
+                            break;
                     }
-                    return json('ok');
-                } else {
-                    return json('402');
                 }
             } else {
                 return json('404');

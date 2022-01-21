@@ -12,12 +12,16 @@ class Segement extends BaseModel
         'host'    => 'json',
     ];
 
+    // 设置json类型字段
+    protected $json = ['host'];
+
     public function setHashAttr($value, $data)
     {
         return encodeId($this->nextId());
     }
 
     public static function onAfterInsert($row){
-        Transaction::afterAddSegment($row);
+        // trace($row);
+        Transaction::afterAddSegement($row);
     }
 }
