@@ -69,3 +69,10 @@ projects/:id/errors/trend
 ## segement
 
 projects/:id/segement post
+
+## errors
+
+
+## 备注
+
+/Applications/phpstudy/Extensions/php/php7.4.27/bin/php-config

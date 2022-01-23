@@ -33,8 +33,15 @@ Route::resource('project', 'Project')->middleware(['jwt']);
 //     Route::get('user/<id>', 'user/read');
 //     Route::put('user/<id>', 'user/update');
 // })->middleware(['jwt']);
+Route::group('project', function(){
+    Route::post('/:id/transactions', 'project/transactions');
+    Route::post('/:id/performance', 'project/performance');
+})->middleware(['jwt']);
+
 
 Route::get('user/<id>', 'user/read')->middleware(['jwt']);
 Route::put('user/<id>', 'user/update')->middleware(['jwt']);
+
+
 
 // Route::any('project')->middleware(['jwt']);

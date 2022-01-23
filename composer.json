@@ -25,7 +25,8 @@
         "topthink/think-orm": "^2.0",
         "thans/tp-jwt-auth": "^1.2",
         "jaguarjack/migration-generator": "dev-master",
-        "hashids/hashids": "^4.1"
+        "hashids/hashids": "^4.1",
+        "nesbot/carbon": "^2.55"
     },
     "require-dev": {
         "symfony/var-dumper": "^4.2",
