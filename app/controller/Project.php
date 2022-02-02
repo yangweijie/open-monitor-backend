@@ -5,6 +5,7 @@ namespace app\controller;
 
 use app\BaseController;
 use app\model\Project as ProjectModel;
+use app\model\Segement;
 use app\model\Transaction;
 use think\Request;
 use Carbon\Carbon;
@@ -98,62 +99,42 @@ class Project extends BaseController
         //
     }
 
-    public function transactions($id, $size = 25, $filter = ''){
-        trace($filter);
-        $filter_arr = json_decode($filter, true);
-        if(false == $filter_arr){
-            return $this->error('参数格式错误', ['errors'=>[['filter'=>'格式错误']]]);
-        }
-        $this->request->filter     = $filter_arr;
-        $this->request->project_id = $id;
-        $project                   = $this->current($id);
-        if(!$project){
-            return $this->error404("非本人的项目");
-        }
-        return json(Transaction::where('project_id', $id)->field(['name','group_hash', 'last_record', 'memory', 'p50'])->append(['throughput', 'performance'])->select());
-    }
 
-    public function performance($id, $size = 25, $filter = ''){
+    public function hosts($id, $size = 25, $filter = ''){
         trace($filter);
         $filter_arr = json_decode($filter, true);
         if(false == $filter_arr){
             return $this->error('参数格式错误', ['errors'=>[['filter'=>'格式错误']]]);
         }
-        $this->request->filter     = $filter_arr;
         $this->request->project_id = $id;
         $project                   = $this->current($id);
         if(!$project){
             return $this->error404("非本人的项目");
         }
         if(empty($filter_arr['end'])){
-            $now = Carbon::now();
-            $hours = $now->diffInRealHours($filter_arr['start']);
-            switch ($hours) {
-                case 1:
-                    $ret = Transaction::lastHourPerformance();
-                    break;
-                case 12:
-                    $ret = Transaction::last12HourPerformance();
-                    break;
-                case 24:
-                    $ret = Transaction::last24HourPerformance();
-                    break;
-                case 72:
-                    $ret = Transaction::last3dayPerformance();
-                    break;
-                default:
-                    $end  = Carbon::parse($filter_arr['end']);
-                    $days = $end->diffInDays($filter_arr['start']);
-                    $ret  = Transaction::customDaysPerformance($days);
-                    break;
-            }
-        }else{
-            $end  = Carbon::parse($filter_arr['end']);
-            $days = $end->diffInDays($filter_arr['start']);
-            trace($end);
-            trace($days);
-            $ret  = Transaction::customDaysPerformanceWithEnd($days, $filter_arr['start'], $filter_arr['end']);
+            $filter_arr['end'] = Carbon::now();
         }
+        $this->request->filter = $filter_arr;
+        $ret = Transaction::hosts($filter_arr, $id);
+        return json($ret);
+    }
+
+    public function time_distribution($id,  $group_hash, $size = 25, $filter = ''){
+        // trace($filter);
+        $filter_arr = json_decode($filter, true);
+        if(false == $filter_arr){
+            return $this->error('参数格式错误', ['errors'=>[['filter'=>'格式错误']]]);
+        }
+        $this->request->project_id = $id;
+        $project                   = $this->current($id);
+        if(!$project){
+            return $this->error404("非本人的项目");
+        }
+        if(empty($filter_arr['end'])){
+            $filter_arr['end'] = Carbon::now();
+        }
+        $this->request->filter = $filter_arr;
+        $ret = Segement::time($filter_arr, $id, $group_hash);
         return json($ret);
     }
 }

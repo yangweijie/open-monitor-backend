@@ -75,4 +75,5 @@ projects/:id/segement post
 
 ## 备注
 
-/Applications/phpstudy/Extensions/php/php7.4.27/bin/php-config
+/Applications/phpstudy/Extensions/php/php7.4.27/bin/phpize
+./configure --with-php-config=/Applications/phpstudy/Extensions/php/php7.4.27/bin/php-config

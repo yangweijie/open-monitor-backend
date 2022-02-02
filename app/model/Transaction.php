@@ -134,4 +134,23 @@ class Transaction extends BaseModel
         }
         return $statics;
     }
+
+    public static function hosts($filter_arr, $project_id){
+        extract($filter_arr);
+        $ret    = self::where('project_id', $project_id)->whereBetweenTime('create_time', $start, $end)->cache(60)->select();
+        $return = [];
+        if($ret){
+            foreach($ret as $key=>$user){
+                $return[] = $user['host'];
+            }
+        }
+        return $return;
+    }
+
+    public static function occurrences($filter_arr){
+        $project_id = request()->project_id;
+        extract($filter_arr);
+        $ret = self::where('project_id', $project_id)->whereBetweenTime('create_time', $start, $end)->cache(60)->select();
+        return $ret;
+    }
 }
