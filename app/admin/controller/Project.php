@@ -11,6 +11,8 @@ use Eadmin\detail\Detail;
 use Eadmin\grid\Filter;
 use Eadmin\grid\Grid;
 use Eadmin\component\basic\Html;
+use Eadmin\component\basic\Button;
+use Eadmin\component\basic\Link;
 
 
 /**
@@ -20,7 +22,7 @@ use Eadmin\component\basic\Html;
  */
 class Project extends Controller
 {
-    protected $title = '标题';
+    protected $title = '项目';
 
     /**
      * 列表
@@ -61,7 +63,26 @@ class Project extends Controller
             // $grid->header('');
             // 操作工具栏
             $grid->actions(function (Actions $action, $data) {
+                //隐藏删除按钮
+                $action->hideDel();
+                //创建一个按钮
+                $button = Button::create('监控')
+                    ->type('primary')
+                    ->size('small')
+                    ->icon('el-icon-key')
+                    ->plain()
+                    // ->dialog()
+                    ->redirect('/admin/monitor/index', ['id'=>$data['id']])
+                    ->title('监控');
+                    // halt($data['id']);
+                    // halt(url('/admin/Monitor/index', ['id'=>$data['id']])->__toString());
+                // $link = Link::create('会话')->href(url('/admin/monitor/index', ['id'=>$data['id']])->__toString());
 
+
+                //追加前面
+                $action->prepend($button);
+                //追加后面
+                // $action->append($button);
             });
             // 删除前回调
             $grid->deling(function ($ids, $trueDelete) {
