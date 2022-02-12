@@ -61,6 +61,7 @@ class Error extends BaseController
                             'group_hash'  => '',
                             'hash'        => $item['hash'],
                             'project_id'  => $this->project_id,
+                            'result'      => $item['result'],
                         ];
                         $t_row = Transaction::create($transaction_insert);
                             break;

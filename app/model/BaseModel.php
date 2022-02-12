@@ -14,6 +14,9 @@ class BaseModel extends Model{
 
     protected $dateFormat         = 'Y-m-d H:i:s';
 
+    // 设置JSON数据返回数组
+    protected $jsonAssoc = true;
+
     public function nextId(){
         return self::max('id') + 1;
     }

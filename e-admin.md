@@ -60,3 +60,5 @@ $form->text('name','名称')->uniqueRule($table, $field, $text)
 #### 事件
 要写 return 
 设置器 要 给需要的字段 指定空值 保证data 里有该字段的key
+
+### 图表

@@ -3,7 +3,9 @@ declare (strict_types=1);
 
 namespace app\model;
 
+
 use Carbon\Carbon;
+use think\facade\Request;
 
 /**
  * @mixin \think\Model
@@ -53,7 +55,9 @@ class Transaction extends BaseModel
     }
 
     public function getPerformanceAttr($value, $data){
-        $end_time = $data['last_record']->create_time;
+        // var_dump($data['last_record']);
+        // return [];
+        // $end_time = $data['last_record']->create_time?? null;
         $max      = 24;
         $unit     = 'hour';
         $statics  = [];
@@ -142,6 +146,44 @@ class Transaction extends BaseModel
         if($ret){
             foreach($ret as $key=>$user){
                 $return[] = $user['host'];
+            }
+        }
+        return $return;
+    }
+
+    public static function hostsE($project_id){
+        $date_type = Request::get('date_type', 'year');
+        $query     = self::where('project_id', $project_id);
+        $dateField = 'create_time';
+
+        switch ($date_type) {
+            case 'yesterday':
+            case 'today':
+                $query->whereDay($dateField, $date_type);
+                break;
+            case 'week':
+                $value = $query->whereWeek($dateField);
+                break;
+            case 'month':
+                $value = $query->whereMonth($dateField);
+                break;
+            case 'year':
+                $value = $query->whereYear($dateField);
+                break;
+            case 'range':
+                $start_date = Request::get('start_date');
+                $end_date   = Request::get('end_date');
+                $value      = $query->whereBetweenTime($dateField, $start_date, $end_date);
+                break;
+            default:
+                ;
+        }
+
+        $ret    = $query->cache(60)->group('host')->select();
+        $return = [];
+        if($ret){
+            foreach($ret as $key=>$user){
+                $return[] = $user['host']->hostname;
             }
         }
         return $return;

@@ -46,6 +46,10 @@ function nealy_days($before_days, $w = false, $d = false){
     return $xAxis;
 }
 
+function pretty_json($value){
+	return json_encode($value, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
+}
+
 // Route::resource('user', 'User');
 // Route::resource('project', 'Project');
 
