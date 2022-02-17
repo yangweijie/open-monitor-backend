@@ -62,3 +62,26 @@ $form->text('name','名称')->uniqueRule($table, $field, $text)
 设置器 要 给需要的字段 指定空值 保证data 里有该字段的key
 
 ### 图表
+
+
+### 函数
+
+|        函数名         |        作用       |
+|-----------------------|-------------------|
+| sysconf               | 获取设置系统配置  |
+| redis                 | redis缓存         |
+| sysqueue              | 系统队列          |
+| admin_success         | 后台成功提示      |
+| admin_error           | 后台错误提示      |
+| admin_info            | 后台信息提示      |
+| admin_warn            | 后台警告          |
+| admin_warn_message    |                   |
+| admin_success_message |                   |
+| admin_error_message   |                   |
+| admin_info_message    |                   |
+| hex2rgba              | 十六进制转化为RGB |
+| admin_trans           | 获取语言变量值    |
+| rgbToHex              | RGB转 十六进制    |
+| color_mix             | 混合颜色          |
+| plug                  | 插件管理          |
+| plug_url              | 插件url           |

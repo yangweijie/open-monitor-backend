@@ -1,3 +1,39 @@
 .el-drawer__body{
 	padding: 20px;
 }
+.d-block {
+    display: block!important;
+}
+.text-muted {
+    color: #6c757d!important;
+}
+.font-weight-bold, .list-group.side-menu .list-group-item.header, .validation-error {
+    font-weight: 700!important;
+}
+
+.badge-success {
+    background-color: #1bb99a!important;
+}
+.badge-default {
+    background-color: #64b0f2!important;
+}
+.badge {
+    color: #fff;
+    padding: .4em .8em;
+}
+.badge-success {
+    background-color: #28a745;
+    color: #fff;
+}
+.badge {
+    border-radius: .25rem;
+    display: inline-block;
+    font-size: 75%;
+    font-weight: 700;
+    line-height: 1;
+    padding: .25em .4em;
+    text-align: center;
+    transition: color .15s ease-in-out,background-color .15s ease-in-out,border-color .15s ease-in-out,box-shadow .15s ease-in-out;
+    vertical-align: baseline;
+    white-space: nowrap;
+}

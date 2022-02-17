@@ -67,8 +67,10 @@ class Monitor extends Controller
 		});
 
 		// $content->row(function (Row $row) use($id){
-		// 	// $row->gutter(10);
-		// 	$row->column(Pre::create('aaa'), 24);
+			
+		// 	$row->column('<span class="d-block text-muted">Timestamp</span><span class="font-weight-bold">14 Feb 11:09:29</span>', 8);
+		// 	$row->column('<span class="d-block text-muted">Result</span><span class="badge badge-default badge-success">200</span>', 8);
+		// 	$row->column('<span class="d-block text-muted">Duration</span><span class="font-weight-bold">867.90 ms</span>', 8);
 		// });
 
 		// $content->row(function (Row $row) use($id){
@@ -120,7 +122,7 @@ class Monitor extends Controller
 	public function table($id){
 		$request = request();
 		$request->filter = $this->getFilterFromDataType();
-		$rows = Transaction::where('project_id', $id)->field(['id','name','group_hash', 'last_record', 'memory', 'p50', 'http', 'context'])->append(['throughput', 'performance'])
+		$rows = Transaction::where('project_id', $id)->field(['id','name','group_hash', 'last_record', 'memory', 'p50', 'http', 'context', 'create_time', 'result'])->append(['throughput', 'performance'])
 		// ->whereBetweenTime('create_time', $request->filter['start'], $request->filter['end'])
 		->select();
 		return Grid::create($rows->toArray(), function (Grid $grid){
@@ -160,11 +162,10 @@ class Monitor extends Controller
 // HTML;
 
 				$content = new Content;
-				$content->row(function (Row $row){
-					// $row->gutter(3);
-					$row->column(Html::create('内容'), 8);
-					$row->column(Html::create('内容'), 8);
-					$row->column(Html::create('内容'), 8);
+				$content->row(function (Row $row) use($data){
+					$row->column('<span class="d-block text-muted">Timestamp</span><span class="font-weight-bold">'.$data['create_time'].'</span>', 8);
+					$row->column('<span class="d-block text-muted">Result</span><span class="badge badge-default badge-success">'.$data['result'].'</span>', 8);
+					$row->column('<span class="d-block text-muted">Duration</span><span class="font-weight-bold">'.$data['p50'].' ms</span>', 8);
 				});
 				$content->row(function(Row $row) use($data) {
 					// halt($data);
