@@ -81,6 +81,17 @@ class Project extends Controller
 
                 //追加前面
                 $action->prepend($button);
+
+                $button = Button::create('异常')
+			        ->type('primary')
+			        ->size('small')
+			        ->icon('el-icon-key')
+			        ->plain()
+			        // ->dialog()
+			        ->redirect('/admin/monitor/errors', ['id'=>$data['id'], 'date_type'=>'month'])
+			        ->title('异常');
+				//追加后面
+				$action->prepend($button);
                 //追加后面
                 // $action->append($button);
             });

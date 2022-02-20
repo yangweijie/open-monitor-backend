@@ -5,6 +5,8 @@ namespace app\admin\controller;
 use app\model\Transaction;
 use app\admin\extend\Pre;
 use app\admin\extend\Segement;
+use app\admin\extend\Stack;
+use app\model\Error;
 use app\model\Segement as ModelSegement;
 use Carbon\Carbon;
 use Eadmin\Controller;
@@ -22,6 +24,7 @@ use Eadmin\component\basic\Statistic;
 use Eadmin\component\basic\Drawer;
 use Eadmin\component\basic\Tabs;
 use Eadmin\component\basic\Button;
+use Eadmin\component\basic\Collapse;
 use Eadmin\component\layout\Content;
 use Eadmin\component\layout\Row;
 
@@ -80,6 +83,15 @@ class Monitor extends Controller
 		// 	$row->column(Segement::create($rows->toArray()), 24);
 		// });
 
+// 		$content->row(function (Row $row) use($id){
+// 			// $row->gutter(10);
+// 			$code = <<<PHP
+// echo 'hello';
+// echo 'world';
+// PHP;
+// 			$row->column(Stack::create(['code'=>$code, 'start'=>33, 'line'=>34]), 24);
+// 		});
+
 		return $content;
 	}
 
@@ -127,10 +139,13 @@ class Monitor extends Controller
 		->select();
 		return Grid::create($rows->toArray(), function (Grid $grid){
 			$grid->title('会话');
+
+			$grid->hideSelection();
+			$grid->hideDeleteButton();
+
 			$grid->column('name','名称');
 			$grid->column('throughput','发生');
 			$grid->column('memory', '内存');
-			// $grid->column('last_record.create_time', '最后查看');
 			$grid->column('result', 'result');
 			// $grid->column('memory', '内存');
 
@@ -155,11 +170,6 @@ class Monitor extends Controller
 				//隐藏删除按钮
 				$action->hideDel();
 				//创建一个按钮
-// $content = <<<HTML
-// <div class="row my-4"><div class="col-sm-4"><span class="d-block text-muted">Timestamp</span> <span class="font-weight-bold">04 Feb 16:05:57</span></div> <div class="col-sm-4"><span class="d-block text-muted">Result</span> <span data-v-00a627cf="" class="badge badge-default badge-success">
-//     200
-// </span></div> <div class="col-sm-4"><span class="d-block text-muted">Duration</span> <span data-v-58b1a006="" class="font-weight-bold">1.19 sec</span></div></div>
-// HTML;
 
 				$content = new Content;
 				$content->row(function (Row $row) use($data){
@@ -175,7 +185,6 @@ class Monitor extends Controller
 					// halt($rows->toArray());
 					$panel = Segement::create($rows? $rows:[['start' => 0, 'duration'=>$data['p50'], 'label'=>'', 'type'=>'app']]);
 					$tabs    = Tabs::create()->pane('Timeline', $panel);
-					// $jsonStr = pretty_json($data['http']['url']);
 					$tabs->pane('Url', Pre::create($data['http']['url']));
 					$tabs->pane('Request', Pre::create($data['http']['request']));
 					if(!empty($data['context'])){
@@ -183,7 +192,6 @@ class Monitor extends Controller
 							$tabs->pane($key, $value);
 						}
 					}
-					// ->pane('提示2','内容2');
 					$row->column($tabs, 24);
 				});
 				// $content = Pre::create('123');
@@ -191,8 +199,7 @@ class Monitor extends Controller
 
 				//追加前面
 				$action->prepend($button);
-				//追加后面
-				// $action->append($button);
+				
 			});
 			// 删除前回调
 			$grid->deling(function ($ids, $trueDelete) {
@@ -253,4 +260,172 @@ class Monitor extends Controller
 		return $echart;
 	}
 
+	public function errors(Content $content, $id){
+		$content->title('监控');
+
+		$content->row(function (Row $row) use($id){
+			$row->gutter(10);
+			$row->column($this->error_trends($id), 24);
+		});
+
+		$content->row(function (Row $row) use($id){
+			$row->gutter(10);
+			$row->column($this->table2($id), 24);
+		});
+		return $content;
+	}
+
+	public function error_trends($id){
+		$echart = new Echart('异常', 'bar', '200px');
+		$echart->table('error');
+		$echart->count('数量', function($query) use ($id){
+			$query->where('project_id', $id);
+		});
+		return $echart;
+	}
+
+
+	public function table2($id){
+		$request = request();
+		$request->filter = $this->getFilterFromDataType();
+		$rows = Error::where('project_id', $id)->field(['id', 'create_time', 'message', 'file'])
+			->append(['last_seen_at'])
+			->select();
+		return Grid::create($rows->toArray(), function (Grid $grid){
+			$grid->title('异常');
+			$grid->hideSelection();
+			$grid->hideDeleteButton();
+			// $grid->hideDeleteSelection();
+			$grid->column('message','message')->display(function ($val,$data){
+				return "{$val}<br>{$data['file']}";
+			});
+			$grid->column('last_seen_at', '最后出现');
+
+			$grid->filter(function (Filter $filter){
+				$filter->datetimeRange('create_time', '创建时间');
+			});
+			
+			// 操作工具栏
+			$grid->actions(function (Actions $action, $data) {
+				//隐藏删除按钮
+				$action->hideDel();
+				//创建一个按钮
+
+				$button = Button::create('详情')
+			        ->type('primary')
+			        ->size('small')
+			        ->icon('el-icon-key')
+			        ->plain()
+			        // ->dialog()
+			        ->redirect('/admin/monitor/error', ['id'=>$data['id']])
+			        ->title('异常');
+				//追加后面
+				$action->prepend($button);
+
+			});
+			// 删除前回调
+			$grid->deling(function ($ids, $trueDelete) {
+
+			});
+			// 更新前回调
+			$grid->updateing(function ($ids, $data) {
+
+			});
+		});
+	}
+
+	public function error($id){
+		$data = Error::find($id);
+		$data->append(['last_seen_at', 'first_seen_at']);
+		return \Eadmin\detail\Detail::create($data, $id, function (\Eadmin\detail\Detail $detail) {
+            $detail->title('异常详情');
+            $detail->row(function (Row $row) use ($detail) {
+            	$data = $detail->getData();
+            	$summary = <<<HTML
+<div class="my-4" title="123"><h5 class="text-truncate">123</h5> <div title="Exception in {$data['file']} at line {$data['line']}" class="font-weight-lighter text-muted text-truncate">
+            Exception in {$data['file']} at line {$data['line']}
+        </div> <div class="small my-2">
+            Last: <span class="badge badge-light">{$data['last_seen_at']}</span> <span class="mx-2">·</span>
+            First: <span class="badge badge-light">{$data['first_seen_at']}</span></div></div>
+HTML;
+            	$row->column($summary);
+            });
+
+            $detail->row(function(Row $row) use($detail){
+            	$error = $detail->getData();
+            	$data  = Transaction::where('group_hash', $error['group_hash'])->find();
+
+            	$stacks = Collapse::create();
+            	foreach ($error['stack'] as $key => $value) {
+            		$title   = Error::title($value);
+            		$content = Error::content($value);
+            		$stacks->item($title, $content);
+            	}
+
+            	$tabs = Tabs::create()->pane('Stacktrace', $stacks);
+				$rows = ModelSegement::where('group_hash', $data['group_hash'])->select();
+				$rows = $rows->toArray();
+				$panel           = Segement::create($rows? $rows:[['start' => 0, 'duration'=>$data['p50'], 'label'=>'', 'type'=>'app']]);
+				$transaction_tab = Tabs::create()->pane('Timeline', $panel);
+				$transaction_tab->pane('Url', Pre::create($data['http']['url']));
+				$transaction_tab->pane('Request', Pre::create($data['http']['request']));
+				if(!empty($data['context'])){
+					foreach ($data['context'] as $key => $value) {
+						$transaction_tab->pane($key, Pre::create($value));
+					}
+				}
+            	$tabs->pane('Transaction', $transaction_tab);
+
+            	$tabs->pane('Context', '<p class="text-muted font-italic my-4">No context information.</p>');
+
+				$row->column($tabs, 24);
+			});
+            // $detail->row(function (Row $row) use ($detail) {
+            //     $steps = Steps::create(1);
+            //     $steps->step('待付款', date('Y-m-d H:i:s'));
+            //     $steps->step('待发货', date('Y-m-d H:i:s'))->content('支付宝', 'subTitle');
+            //     $steps->step('待收货', date('Y-m-d H:i:s'));
+            //     $steps->step('完成');
+            //     $row->column(Card::create($steps));
+            // });
+            // $detail->row(function (Row $row) use ($detail) {
+            //     $row->column($detail->card('', function (\Eadmin\detail\Detail $detail) {
+            //         $detail->push(Html::create('订单信息')->tag('h2')->style(['marginTop' => '10px']));
+            //         $detail->field('product', '订购产品')->md(24);
+            //         $detail->field('order_no', '订单号')->md(6);
+            //         $detail->field('money', '订单金额')->md(6);
+            //         $detail->field('remark', '备注')->md(6);
+            //         $detail->field('create_time', '下单时间')->md(6);
+
+            //         $detail->push(Divider::create());
+            //         $column = new Column();
+            //         $detail->push($column->content(Html::create('用户信息')->tag('h2'))->style(['marginTop' => '10px']));
+            //         $detail->field('nickname', '用户姓名')->md(6);
+            //         $detail->field('phone', '	联系电话')->md(6);
+            //         $detail->field('express', '常用快递')->md(6);
+            //         $detail->field('address', '取货地址')->md(6);
+            //         $detail->field('remark', '备注')->md(6);
+            //     }),18);
+
+            //     $faker = Factory::create('zh_CN');
+            //     $timeLine = TimeLine::create();
+            //     for ($i = 0; $i < 4; $i++) {
+            //         $timeLine->item($faker->text(30))->timestamp($faker->time() );
+            //     }
+            //     $row->column(Card::create($timeLine)->header('发货信息'),6);
+            // });
+            // $detail->row(function (Row $row) use ($detail) {
+            //     $row->column($detail->grid('goods', '商品信息', function (Grid $grid) {
+            //         $grid->column('name', '商品名称');
+            //         $grid->column('number', '商品条码');
+            //         $grid->column('price', '单价');
+            //         $grid->column('num', '数量');
+            //         $grid->column('money', '金额');
+            //     }));
+            // });
+
+        });
+	}
+
 }
+

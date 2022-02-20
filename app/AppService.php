@@ -5,6 +5,7 @@ namespace app;
 
 use app\admin\extend\Pre;
 use app\admin\extend\Segement;
+use app\admin\extend\Stack;
 use think\Service;
 use Eadmin\form\Form;
 
@@ -18,6 +19,7 @@ class AppService extends Service
         // 服务注册
         Form::extend('pre', Pre::class);
         Form::extend('segment', Segement::class);
+        Form::extend('stack', Stack::class);
     }
 
     public function boot()
