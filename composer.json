@@ -27,7 +27,8 @@
         "jaguarjack/migration-generator": "dev-master",
         "hashids/hashids": "^4.1",
         "nesbot/carbon": "^2.55",
-        "rockys/e-admin": "^3.0"
+        "rockys/e-admin": "^3.0",
+        "topthink/think-migration": "^3.0"
     },
     "require-dev": {
         "symfony/var-dumper": "^4.2",
