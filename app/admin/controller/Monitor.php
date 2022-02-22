@@ -6,7 +6,7 @@ use app\model\Transaction;
 use app\admin\extend\Pre;
 use app\admin\extend\Segement;
 use app\admin\extend\Stack;
-use app\model\Error;
+use app\model\Errors;
 use app\model\Segement as ModelSegement;
 use Carbon\Carbon;
 use Eadmin\Controller;
@@ -288,7 +288,7 @@ class Monitor extends Controller
 	public function table2($id){
 		$request = request();
 		$request->filter = $this->getFilterFromDataType();
-		$rows = Error::where('project_id', $id)->field(['id', 'create_time', 'message', 'file'])
+		$rows = Errors::where('project_id', $id)->field(['id', 'create_time', 'message', 'file'])
 			->append(['last_seen_at'])
 			->select();
 		return Grid::create($rows->toArray(), function (Grid $grid){
@@ -335,7 +335,7 @@ class Monitor extends Controller
 	}
 
 	public function error($id){
-		$data = Error::find($id);
+		$data = Errors::find($id);
 		$data->append(['last_seen_at', 'first_seen_at']);
 		return \Eadmin\detail\Detail::create($data, $id, function (\Eadmin\detail\Detail $detail) {
             $detail->title('异常详情');
@@ -357,8 +357,8 @@ HTML;
 
             	$stacks = Collapse::create();
             	foreach ($error['stack'] as $key => $value) {
-            		$title   = Error::title($value);
-            		$content = Error::content($value);
+            		$title   = Errors::title($value);
+            		$content = Errors::content($value);
             		$stacks->item($title, $content);
             	}
 

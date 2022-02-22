@@ -10,7 +10,7 @@ use Eadmin\detail\Detail;
 use Eadmin\grid\Filter;
 use Eadmin\grid\Grid;
 use Eadmin\component\basic\Html;
-use app\model\Error;
+use app\model\Errors As ErrorsModel;
 
 /**
  *
@@ -29,7 +29,7 @@ class Errors extends Controller
      */
     public function index() : Grid
     {
-        return Grid::create(new Error, function (Grid $grid){
+        return Grid::create(new ErrorsModel, function (Grid $grid){
             $grid->title($this->title);
 			$grid->column('id','id');
 			$grid->column('project_id','project_id');
@@ -80,7 +80,7 @@ class Errors extends Controller
      */
     public function form() : Form
     {
-         return Form::create(new Error,function (Form $form){
+         return Form::create(new ErrorsModel,function (Form $form){
             $form->title($this->title);
 			$form->text('id','id');
 			$form->text('project_id','project_id');
@@ -123,7 +123,7 @@ class Errors extends Controller
      */
      public function detail($id=0) : Detail
      {
-        return Detail::create(new Error,$id,function (Detail $detail){
+        return Detail::create(new ErrorsModel, $id,function (Detail $detail){
             $detail->title($this->title);
 			$detail->field('id','id');
 			$detail->field('project_id','project_id');

@@ -9,7 +9,7 @@ use Carbon\Carbon;
 /**
  * @mixin \think\Model
  */
-class Error extends BaseModel
+class Errors extends BaseModel
 {
     public static $types = [
         'stack' => 'json',
