@@ -136,6 +136,7 @@ class Monitor extends Controller
 		$request->filter = $this->getFilterFromDataType();
 		$rows = Transaction::where('project_id', $id)->field(['id','name','group_hash', 'last_record', 'memory', 'p50', 'http', 'context', 'create_time', 'result'])->append(['throughput', 'performance'])
 		// ->whereBetweenTime('create_time', $request->filter['start'], $request->filter['end'])
+		->order('id DESC')
 		->select();
 		return Grid::create($rows->toArray(), function (Grid $grid){
 			$grid->title('会话');
@@ -144,9 +145,11 @@ class Monitor extends Controller
 			$grid->hideDeleteButton();
 
 			$grid->column('name','名称');
-			$grid->column('throughput','发生');
-			$grid->column('memory', '内存');
-			$grid->column('result', 'result');
+			$grid->column('p50','时长(ms)');
+			$grid->column('memory',      '内存(MB)');
+			$grid->column('result',      'result');
+			$grid->column('create_time', '时间');
+
 			// $grid->column('memory', '内存');
 
 
@@ -195,7 +198,7 @@ class Monitor extends Controller
 					$row->column($tabs, 24);
 				});
 				// $content = Pre::create('123');
-				$button = Drawer::create(Button::create('按钮'))->title($data['name'])->direction('ltr')->width('900px')->content($content);
+				$button = Drawer::create(Button::create('更多'))->title($data['name'])->direction('ltr')->width('900px')->content($content);
 
 				//追加前面
 				$action->prepend($button);
@@ -277,7 +280,7 @@ class Monitor extends Controller
 
 	public function error_trends($id){
 		$echart = new Echart('异常', 'bar', '200px');
-		$echart->table('error');
+		$echart->table('errors');
 		$echart->count('数量', function($query) use ($id){
 			$query->where('project_id', $id);
 		});

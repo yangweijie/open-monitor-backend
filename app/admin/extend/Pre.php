@@ -21,6 +21,9 @@ class Pre extends Field
 
 	public function jsonSerialize()
 	{
+		if(empty(View::getConfig('view_path')) && request()->has('ajax_request_data')){
+			View::config(['view_path'=>app_path().'/admin/view/']);
+		}
 		$this->content(View::fetch('/pre'));
 		return parent::jsonSerialize();
 	}
