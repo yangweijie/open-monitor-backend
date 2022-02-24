@@ -49,6 +49,7 @@ class Monitor extends Controller
 	{
 		$content->title('监控');
 
+		// 统计报表
 		// $content->row(function (Row $row) use($id){
 		//     $row->gutter(10);
 		//     $row->column($this->noTransaction($id), 24);
@@ -68,29 +69,6 @@ class Monitor extends Controller
 			// $row->gutter(10);
 			$row->column($this->table($id), 24);
 		});
-
-		// $content->row(function (Row $row) use($id){
-			
-		// 	$row->column('<span class="d-block text-muted">Timestamp</span><span class="font-weight-bold">14 Feb 11:09:29</span>', 8);
-		// 	$row->column('<span class="d-block text-muted">Result</span><span class="badge badge-default badge-success">200</span>', 8);
-		// 	$row->column('<span class="d-block text-muted">Duration</span><span class="font-weight-bold">867.90 ms</span>', 8);
-		// });
-
-		// $content->row(function (Row $row) use($id){
-		// 	// $row->gutter(10);
-		// 	$rows = ModelSegement::where('group_hash', '2J')->select();
-		// 	// halt($rows->toArray());
-		// 	$row->column(Segement::create($rows->toArray()), 24);
-		// });
-
-// 		$content->row(function (Row $row) use($id){
-// 			// $row->gutter(10);
-// 			$code = <<<PHP
-// echo 'hello';
-// echo 'world';
-// PHP;
-// 			$row->column(Stack::create(['code'=>$code, 'start'=>33, 'line'=>34]), 24);
-// 		});
 
 		return $content;
 	}

@@ -183,7 +183,7 @@ class Transaction extends BaseModel
         $return = [];
         if($ret){
             foreach($ret as $key=>$user){
-                $return[] = $user['host']->hostname;
+                $return[] = $user['host']['hostname'];
             }
         }
         return $return;
